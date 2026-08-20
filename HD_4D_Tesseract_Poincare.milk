@@ -1,0 +1,97 @@
+[preset00]
+fRating=5.000000
+fGammaAdj=1.000000
+fDecay=0.975000
+fVideoEchoZoom=1.000000
+fVideoEchoAlpha=0.000000
+nVideoEchoOrientation=0
+nWaveMode=0
+bAdditiveWaves=1
+bWaveDots=0
+bWaveThick=1
+bModWaveAlphaByVolume=1
+bMaximizeWaveColor=0
+bTexWrap=1
+bDarkenCenter=0
+bRedefineRad=0
+bInverseDraw=0
+fWaveAlpha=0.900000
+fWaveScale=1.500000
+fWaveSmoothing=0.500000
+fWaveParam=0.300000
+fModWaveAlphaStart=0.750000
+fModWaveAlphaEnd=0.950000
+fWarpAnimSpeed=1.000000
+fWarpScale=1.000000
+fZoomExponent=1.000000
+fShader=0.000000
+zoom=1.006000
+rot=0.000000
+cx=0.500000
+cy=0.500000
+dx=0.000000
+dy=0.000000
+warp=0.000000
+sx=1.000000
+sy=1.000000
+wave_r=0.950000
+wave_g=0.200000
+wave_b=1.000000
+wave_x=0.500000
+wave_y=0.500000
+wave_mystery=0.300000
+
+per_frame_1=// 1. Audio Frequency Attenuation & Energy Tracking
+per_frame_2=q1 = bass_att * 0.6 + bass * 0.4;
+per_frame_3=q2 = mid_att * 0.6 + mid * 0.4;
+per_frame_4=q3 = treb_att * 0.6 + treb * 0.4;
+per_frame_5=
+per_frame_6=// 2. 4D Hypercube Quaternion Hyper-Rotation Angles (XW & YZ Planes)
+per_frame_7=q4 = time * 0.4 + q1 * 0.3;
+per_frame_8=q5 = time * 0.6 + q2 * 0.3;
+per_frame_9=
+per_frame_10=// 3. Möbius Transformation Complex Parameter Constant C = q6 + i*q7
+per_frame_11=q6 = 0.2 * sin(time * 0.8) * q2;
+per_frame_12=q7 = 0.2 * cos(time * 0.9) * q3;
+per_frame_13=
+per_frame_14=// 4. Relativistic Doppler Color Shifts
+per_frame_15=q8 = sin(time * 1.5 + q1);
+per_frame_16=wave_r = 0.5 + 0.5 * sin(time * 1.1 + q1 * 1.2);
+per_frame_17=wave_g = 0.5 + 0.5 * sin(time * 1.7 + q2 * 1.2);
+per_frame_18=wave_b = 0.5 + 0.5 * cos(time * 2.3 + q3 * 1.2);
+per_frame_19=
+per_frame_20=zoom = 1.006 + 0.02 * sin(time * 1.2) * q1;
+per_frame_21=rot = 0.02 * sin(time * 0.5) * q2;
+
+per_pixel_1=// 1. Complex Coordinates z = u + i*v centered at origin
+per_pixel_2=u = (x - 0.5) * 2.0;
+per_pixel_3=v = (y - 0.5) * 2.0;
+per_pixel_4=
+per_pixel_5=// 2. Hyperbolic Poincaré Disk Möbius Transformation z' = (z + C) / (1 + conj(C)*z)
+per_pixel_6=c_re = q6;
+per_pixel_7=c_im = q7;
+per_pixel_8=num_re = u + c_re;
+per_pixel_9=num_im = v + c_im;
+per_pixel_10=den_re = 1.0 + (c_re * u + c_im * v);
+per_pixel_11=den_im = c_re * v - c_im * u;
+per_pixel_12=den_sq = den_re * den_re + den_im * den_im + 0.0001;
+per_pixel_13=
+per_pixel_14=hu = (num_re * den_re + num_im * den_im) / den_sq;
+per_pixel_15=hv = (num_im * den_re - num_re * den_im) / den_sq;
+per_pixel_16=h_rad = sqrt(hu * hu + hv * hv);
+per_pixel_17=
+per_pixel_18=// 3. 4D Hypercube Stereographic Projection onto 2D Surface
+per_pixel_19=w4 = sin(q4) * hu + cos(q5) * hv;
+per_pixel_20=scale4d = 1.0 / (2.2 - w4 * 0.6);
+per_pixel_21=
+per_pixel_22=// 4. Relativistic Doppler Factor gamma = 1 / sqrt(1 - v^2/c^2)
+per_pixel_23=doppler = 1.0 / sqrt(1.0 - 0.4 * min(0.9, h_rad));
+per_pixel_24=dx = -0.5 * (hu * scale4d * 0.025 * q1 * doppler);
+per_pixel_25=dy = -0.5 * (hv * scale4d * 0.025 * q3 * doppler);
+per_pixel_26=
+per_pixel_27=// 5. Quantum Wavefunction Interference Fringes
+per_pixel_28=quantum_phase = sin(h_rad * 20.0 - time * 3.0 + q8 * 4.0);
+per_pixel_29=rot = rot + 0.05 * quantum_phase * q2 / (h_rad + 0.2);
+per_pixel_30=
+per_pixel_31=// 6. Hyperbolic Non-Euclidean Boundary Folding
+per_pixel_32=warp = warp + 0.1 * sin(atan2(hv, hu) * 8.0 + time) * q1;

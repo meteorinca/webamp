@@ -1,0 +1,82 @@
+[preset00]
+fRating=5.000000
+fGammaAdj=1.000000
+fDecay=0.992000
+fVideoEchoZoom=1.000000
+fVideoEchoAlpha=0.000000
+nVideoEchoOrientation=0
+nWaveMode=0
+bAdditiveWaves=0
+bWaveDots=0
+bWaveThick=1
+bModWaveAlphaByVolume=0
+bMaximizeWaveColor=0
+bTexWrap=1
+bDarkenCenter=0
+bRedefineRad=0
+bInverseDraw=0
+fWaveAlpha=0.700000
+fWaveScale=1.000000
+fWaveSmoothing=0.800000
+fWaveParam=0.000000
+fModWaveAlphaStart=0.750000
+fModWaveAlphaEnd=0.950000
+fWarpAnimSpeed=1.000000
+fWarpScale=1.000000
+fZoomExponent=1.000000
+fShader=0.000000
+zoom=1.003000
+rot=0.000000
+cx=0.500000
+cy=0.500000
+dx=0.000000
+dy=0.000000
+warp=0.002000
+sx=1.000000
+sy=1.000000
+wave_r=0.150000
+wave_g=0.450000
+wave_b=0.850000
+wave_x=0.500000
+wave_y=0.500000
+wave_mystery=0.000000
+
+per_frame_1=// 1. Heavy Damped Audio Smoothing (Zero Jitter or Strobing)
+per_frame_2=b_smooth = bass_att * 0.2 + bass * 0.1;
+per_frame_3=m_smooth = mid_att * 0.2 + mid * 0.1;
+per_frame_4=t_smooth = treb_att * 0.2 + treb * 0.1;
+per_frame_5=
+per_frame_6=q1 = q1 * 0.92 + b_smooth * 0.08; // Sub-bass smooth heartbeat
+per_frame_7=q2 = q2 * 0.92 + m_smooth * 0.08; // Mid-range vocal silk flow
+per_frame_8=q3 = q3 * 0.92 + t_smooth * 0.08; // High-range luminescence
+per_frame_9=
+per_frame_10=// 2. Slow Ambient Aurora Palette Shift (Deep Indigo -> Teal -> Amethyst)
+per_frame_11=slow_time = time * 0.08;
+per_frame_12=wave_r = 0.12 + 0.15 * sin(slow_time);
+per_frame_13=wave_g = 0.35 + 0.20 * sin(slow_time * 0.7 + 1.5);
+per_frame_14=wave_b = 0.70 + 0.25 * cos(slow_time * 0.5);
+per_frame_15=
+per_frame_16=// 3. Ultra-Smooth Cinematic Breathing
+per_frame_17=zoom = 1.002 + 0.006 * sin(time * 0.3) + 0.004 * q1;
+per_frame_18=rot = 0.004 * sin(time * 0.15);
+
+per_pixel_1=// 1. Centered Polar Coordinates
+per_pixel_2=dx_c = x - 0.5;
+per_pixel_3=dy_c = y - 0.5;
+per_pixel_4=r = sqrt(dx_c * dx_c + dy_c * dy_c) + 0.001;
+per_pixel_5=a = atan2(dy_c, dx_c);
+per_pixel_6=
+per_pixel_7=// 2. Liquid Silk Navier-Stokes Style Vorticity
+per_pixel_8=wave1 = sin(r * 6.0 - time * 0.4 + a * 2.0) * (0.004 + 0.003 * q2);
+per_pixel_9=wave2 = cos(a * 4.0 + time * 0.25) * (0.003 + 0.002 * q1);
+per_pixel_10=
+per_pixel_11=// 3. Soft Sub-Bass Heartbeat & Refraction
+per_pixel_12=bass_pulse = sin(r * 4.0 - time * 0.8) * (0.003 * q1);
+per_pixel_13=treble_refract = 0.002 * sin(r * 18.0 - time * 0.6) * q3;
+per_pixel_14=
+per_pixel_15=// 4. Silky Smooth Vector Displacements
+per_pixel_16=dx = (dx_c / r) * (bass_pulse + treble_refract) + wave1 * cos(a);
+per_pixel_17=dy = (dy_c / r) * (bass_pulse + treble_refract) + wave1 * sin(a);
+per_pixel_18=
+per_pixel_19=rot = rot + 0.003 * wave2 / (r + 0.4);
+per_pixel_20=warp = warp + 0.002 * sin(a * 3.0 + time * 0.2);

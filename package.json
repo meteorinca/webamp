@@ -1,0 +1,39 @@
+{
+  "name": "webamp",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "butterchurn": "3.0.0-beta.5",
+    "butterchurn-presets": "3.0.0-beta.4",
+    "byte-data": "18.1.1",
+    "classnames": "^2.2.5",
+    "invariant": "^2.2.3",
+    "jszip": "^3.10.1",
+    "lodash": "^4.17.21",
+    "milkdrop-preset-converter-aws": "^0.1.6",
+    "music-metadata": "^11.6.0",
+    "music-metadata-browser": "^0.6.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-redux": "^8.0.5",
+    "redux": "^5.0.1",
+    "redux-thunk": "^3.1.0",
+    "reselect": "^3.0.1",
+    "riff-file": "^1.0.3",
+    "tinyqueue": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.26",
+    "@types/react-dom": "^18.0.10",
+    "@vitejs/plugin-react": "^4.3.1",
+    "typescript": "^5.6.2",
+    "vite": "^5.2.12",
+    "vite-plugin-node-polyfills": "^0.22.0"
+  }
+}
