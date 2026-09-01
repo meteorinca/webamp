@@ -1,5 +1,5 @@
 import { getButterchurnOptions } from "./butterchurnOptions";
-import { initialTracks } from "./config";
+import { initialTracks, initialState } from "./config";
 import { Options, WindowLayout } from "./webamp/js/types";
 import { InjectableDependencies, PrivateOptions } from "./webamp/js/webampLazy";
 
@@ -33,6 +33,7 @@ export async function getWebampConfig(
     enableMediaSession: true,
     windowLayout,
     __butterchurnOptions,
+    __initialState: initialState,
     requireJSZip: () => import("jszip/dist/jszip" as any),
     requireMusicMetadata: () => import("music-metadata" as any),
   };

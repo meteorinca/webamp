@@ -2,6 +2,7 @@ import { IMedia } from "./media";
 import { next as nextTrack } from "./actionCreators";
 import * as Selectors from "./selectors";
 import { MiddlewareStore, Action, Dispatch } from "./types";
+import { BANDS } from "./constants";
 
 export default (media: IMedia) => (store: MiddlewareStore) => {
   const {
@@ -13,7 +14,9 @@ export default (media: IMedia) => (store: MiddlewareStore) => {
   media.setVolume(volume);
   media.setBalance(balance);
   media.setPreamp(sliders.preamp);
-  // TODO: Ensure other values like bands are in sync
+  BANDS.forEach((band) => {
+    media.setEqBand(band, sliders[band]);
+  });
 
   media.on("timeupdate", () => {
     store.dispatch({
