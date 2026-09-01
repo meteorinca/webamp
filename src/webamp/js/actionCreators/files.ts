@@ -6,9 +6,16 @@ import * as Utils from "../utils";
 import {
   promptForFileReferences,
   genArrayBufferFromFileReference,
+  genStringFromFileReference,
   genMediaDuration,
   genMediaTags,
 } from "../fileUtils";
+import {
+  parsePlaylist,
+  serializeTracksToM3u,
+  savePlaylistToStorage as savePlaylistToLocalStorage,
+  loadPlaylistFromStorage as loadPlaylistFromLocalStorage,
+} from "../playlistUtils";
 import skinParser from "../skinParser";
 import {
   getTracks,
@@ -53,12 +60,13 @@ export function addTracksFromReferences(
 
 const SKIN_FILENAME_MATCHER = new RegExp("(wsz|zip)$", "i");
 const EQF_FILENAME_MATCHER = new RegExp("eqf$", "i");
+const PLAYLIST_FILENAME_MATCHER = new RegExp("(m3u|m3u8|pls)$", "i");
 export function loadFilesFromReferences(
   fileReferences: FileList,
   loadStyle: LoadStyle = LOAD_STYLE.PLAY,
   atIndex: number | undefined = undefined
 ): Thunk {
-  return (dispatch) => {
+  return async (dispatch) => {
     if (fileReferences.length < 1) {
       return;
     } else if (fileReferences.length === 1) {
@@ -69,6 +77,20 @@ export function loadFilesFromReferences(
       } else if (EQF_FILENAME_MATCHER.test(fileReference.name)) {
         dispatch(setEqFromFileReference(fileReference));
         return;
+      } else if (PLAYLIST_FILENAME_MATCHER.test(fileReference.name)) {
+        try {
+          const content = await genStringFromFileReference(fileReference);
+          const tracks = parsePlaylist(content, fileReference.name);
+          if (tracks.length > 0) {
+            if (loadStyle === LOAD_STYLE.PLAY) {
+              dispatch(removeAllTracks());
+            }
+            dispatch(loadMediaFiles(tracks, loadStyle, atIndex ?? 0));
+            return;
+          }
+        } catch (e) {
+          console.error("Failed to parse dropped playlist file:", e);
+        }
       }
     }
     dispatch(addTracksFromReferences(fileReferences, loadStyle, atIndex));
@@ -421,6 +443,96 @@ export function addFilesFromUrl(atIndex = 0): Thunk {
   };
 }
 
+function notifyUser(dispatch: any, message: string) {
+  dispatch({ type: "SET_USER_MESSAGE", message });
+  setTimeout(() => {
+    dispatch({ type: "UNSET_USER_MESSAGE" });
+  }, 2500);
+}
+
+export function savePlaylistToFile(): Thunk {
+  return (dispatch, getState) => {
+    const tracks = getUserTracks(getState());
+    if (tracks.length === 0) {
+      notifyUser(dispatch, "PLAYLIST IS EMPTY");
+      return;
+    }
+    const content = serializeTracksToM3u(tracks);
+    const blob = new Blob([content], { type: "audio/x-mpegurl;charset=utf-8" });
+    const uri = URL.createObjectURL(blob);
+    Utils.downloadURI(uri, "Winamp Playlist.m3u8");
+    setTimeout(() => URL.revokeObjectURL(uri), 2000);
+    notifyUser(dispatch, "PLAYLIST SAVED TO FILE");
+  };
+}
+
+export function savePlaylistToStorage(): Thunk {
+  return (dispatch, getState) => {
+    const tracks = getUserTracks(getState());
+    if (tracks.length === 0) {
+      notifyUser(dispatch, "PLAYLIST IS EMPTY");
+      return;
+    }
+    const success = savePlaylistToLocalStorage(tracks);
+    if (success) {
+      notifyUser(dispatch, "PLAYLIST SAVED TO BROWSER");
+    } else {
+      notifyUser(dispatch, "FAILED TO SAVE PLAYLIST");
+    }
+  };
+}
+
+export function saveFilesToList(): Thunk {
+  return (dispatch, getState, { handleSaveListEvent }) => {
+    if (handleSaveListEvent) {
+      handleSaveListEvent(getUserTracks(getState()));
+      return;
+    }
+    // Default fallback: save to browser storage and download file
+    dispatch(savePlaylistToStorage());
+    dispatch(savePlaylistToFile());
+  };
+}
+
+export function loadPlaylistFromFile(): Thunk {
+  return async (dispatch) => {
+    const fileReferences = await promptForFileReferences({
+      accept: ".m3u,.m3u8,.pls,.json,audio/x-mpegurl,application/json",
+    });
+    if (fileReferences.length < 1) {
+      return;
+    }
+    const file = fileReferences[0];
+    try {
+      const content = await genStringFromFileReference(file);
+      const tracks = parsePlaylist(content, file.name);
+      if (tracks.length > 0) {
+        dispatch(removeAllTracks());
+        dispatch(loadMediaFiles(tracks, LOAD_STYLE.NONE, 0));
+        notifyUser(dispatch, `LOADED ${tracks.length} TRACKS`);
+      } else {
+        alert("No valid tracks found in playlist file.");
+      }
+    } catch (e) {
+      console.error("Failed to load playlist file:", e);
+      alert("Failed to parse playlist file.");
+    }
+  };
+}
+
+export function loadPlaylistFromStorage(): Thunk {
+  return (dispatch) => {
+    const tracks = loadPlaylistFromLocalStorage();
+    if (tracks && tracks.length > 0) {
+      dispatch(removeAllTracks());
+      dispatch(loadMediaFiles(tracks, LOAD_STYLE.NONE, 0));
+      notifyUser(dispatch, `RESTORED ${tracks.length} TRACKS`);
+    } else {
+      alert("No saved playlist found in browser storage.");
+    }
+  };
+}
+
 export function addFilesFromList(): Thunk {
   return async (dispatch, getState, { handleLoadListEvent }) => {
     if (handleLoadListEvent) {
@@ -432,19 +544,10 @@ export function addFilesFromList(): Thunk {
         dispatch(loadMediaFiles(tracks, LOAD_STYLE.NONE, 0));
         return;
       }
-    } else {
-      alert("Not supported in Webamp");
+      return;
     }
-  };
-}
-
-export function saveFilesToList(): Thunk {
-  return (dispatch, getState, { handleSaveListEvent }) => {
-    if (handleSaveListEvent) {
-      handleSaveListEvent(getUserTracks(getState()));
-    } else {
-      alert("Not supported in Webamp");
-    }
+    // Default fallback: prompt to load playlist file
+    dispatch(loadPlaylistFromFile());
   };
 }
 

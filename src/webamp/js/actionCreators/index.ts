@@ -72,6 +72,10 @@ export {
   addFilesFromUrl,
   addFilesFromList,
   saveFilesToList,
+  savePlaylistToFile,
+  savePlaylistToStorage,
+  loadPlaylistFromFile,
+  loadPlaylistFromStorage,
   droppedFiles,
 } from "./files";
 export {
